@@ -9,7 +9,7 @@ pipeline {
     environment {
         IMAGE_NAME      = 'gold-dashboard'
         CONTAINER_NAME  = 'gold-dashboard'
-        HOST_PORT       = '5000'
+        HOST_PORT       = '5050'
     }
 
     stages {
