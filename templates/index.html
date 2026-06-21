@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cairo Bullion Board — Live Gold &amp; FX</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#14110D;
+    --panel:#1C1810;
+    --panel-line:#332B1C;
+    --brass:#C9A24B;
+    --brass-bright:#F2D88F;
+    --ink:#EDE6D6;
+    --ink-dim:#9A8F73;
+    --up:#7FA66B;
+    --down:#B6543C;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    background-image:
+      radial-gradient(circle at 15% 0%, rgba(201,162,75,0.08), transparent 45%),
+      radial-gradient(circle at 85% 100%, rgba(201,162,75,0.06), transparent 45%);
+  }
+  a{color:inherit;}
+
+  /* ---------- Ticker ---------- */
+  .ticker-wrap{
+    background:#0E0C08;
+    border-bottom:1px solid var(--panel-line);
+    overflow:hidden;
+    white-space:nowrap;
+    position:sticky;
+    top:0;
+    z-index:10;
+  }
+  .ticker{
+    display:inline-block;
+    padding:10px 0;
+    animation:scroll 28s linear infinite;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;
+    letter-spacing:.02em;
+  }
+  .ticker span{
+    margin:0 28px;
+    color:var(--ink-dim);
+  }
+  .ticker span b{
+    color:var(--brass-bright);
+    font-weight:500;
+  }
+  @keyframes scroll{
+    from{transform:translateX(0);}
+    to{transform:translateX(-50%);}
+  }
+
+  /* ---------- Header ---------- */
+  header{
+    max-width:1040px;
+    margin:0 auto;
+    padding:56px 24px 28px;
+    text-align:center;
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--brass);
+  }
+  h1{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:clamp(32px,5vw,52px);
+    margin:10px 0 6px;
+    color:var(--brass-bright);
+  }
+  header p{
+    color:var(--ink-dim);
+    font-size:15px;
+    margin:0;
+  }
+
+  /* ---------- Layout ---------- */
+  main{
+    max-width:1040px;
+    margin:0 auto;
+    padding:0 24px 80px;
+    display:grid;
+    grid-template-columns:1.1fr 1fr;
+    gap:24px;
+  }
+  @media (max-width:760px){
+    main{grid-template-columns:1fr;}
+  }
+
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--panel-line);
+    border-radius:4px;
+    padding:28px;
+  }
+  .panel h2{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:18px;
+    margin:0 0 20px;
+    color:var(--ink);
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .panel h2 .dot{
+    width:7px;height:7px;border-radius:50%;
+    background:var(--up);
+    box-shadow:0 0 0 4px rgba(127,166,107,0.15);
+  }
+
+  /* ---------- Gold ingot hero number ---------- */
+  .ingot{
+    display:flex;
+    align-items:flex-end;
+    gap:8px;
+    margin-bottom:6px;
+  }
+  .ingot .num{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:48px;
+    font-weight:600;
+    color:var(--brass-bright);
+    line-height:1;
+  }
+  .ingot .unit{
+    font-size:14px;
+    color:var(--ink-dim);
+    padding-bottom:8px;
+  }
+  .sub-rate{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;
+    color:var(--ink-dim);
+    margin-bottom:24px;
+  }
+
+  .karat-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:1px;
+    background:var(--panel-line);
+    border:1px solid var(--panel-line);
+    border-radius:3px;
+    overflow:hidden;
+  }
+  .karat-cell{
+    background:var(--panel);
+    padding:14px 16px;
+  }
+  .karat-cell .k{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    color:var(--brass);
+    letter-spacing:.08em;
+  }
+  .karat-cell .v{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:18px;
+    color:var(--ink);
+    margin-top:4px;
+  }
+
+  /* ---------- Currency rows ---------- */
+  .fx-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:14px 0;
+    border-bottom:1px solid var(--panel-line);
+  }
+  .fx-row:last-child{border-bottom:none;}
+  .fx-left{
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .fx-code{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:14px;
+    color:var(--ink);
+    width:42px;
+  }
+  .fx-name{
+    font-size:12px;
+    color:var(--ink-dim);
+  }
+  .fx-value{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:18px;
+    color:var(--brass-bright);
+  }
+
+  /* ---------- Footer / status ---------- */
+  .status-bar{
+    max-width:1040px;
+    margin:0 auto;
+    padding:0 24px 40px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    color:var(--ink-dim);
+  }
+  .status-bar .live{
+    color:var(--up);
+  }
+  .status-bar .err{
+    color:var(--down);
+  }
+
+  .skeleton{
+    color:var(--ink-dim);
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;
+  }
+</style>
+</head>
+<body>
+
+  <div class="ticker-wrap">
+    <div class="ticker" id="ticker">
+      <span class="skeleton">Loading live rates…</span>
+    </div>
+  </div>
+
+  <header>
+    <div class="eyebrow">Live Exchange Board</div>
+    <h1>Cairo Bullion Board</h1>
+    <p>Gold price per gram and the top currencies against the Egyptian pound, refreshed automatically.</p>
+  </header>
+
+  <main>
+    <section class="panel">
+      <h2><span class="dot"></span>Gold — EGP per gram</h2>
+      <div class="ingot">
+        <div class="num" id="goldEgp">—</div>
+        <div class="unit">EGP / g (24K)</div>
+      </div>
+      <div class="sub-rate" id="goldUsd">— USD / oz</div>
+      <div class="karat-grid" id="karatGrid">
+        <div class="karat-cell"><div class="k">24K</div><div class="v">—</div></div>
+        <div class="karat-cell"><div class="k">22K</div><div class="v">—</div></div>
+        <div class="karat-cell"><div class="k">21K</div><div class="v">—</div></div>
+        <div class="karat-cell"><div class="k">18K</div><div class="v">—</div></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2><span class="dot"></span>Top currencies → EGP</h2>
+      <div id="fxList">
+        <div class="skeleton">Loading rates…</div>
+      </div>
+    </section>
+  </main>
+
+  <div class="status-bar">
+    <span id="statusText">Connecting…</span>
+    <span id="clock"></span>
+  </div>
+
+<script>
+const CCY_NAMES = {
+  USD: "US Dollar",
+  EUR: "Euro",
+  GBP: "British Pound",
+  SAR: "Saudi Riyal",
+  AED: "UAE Dirham",
+};
+
+const fmt = (n, decimals=2) => Number(n).toLocaleString('en-US', {
+  minimumFractionDigits: decimals, maximumFractionDigits: decimals
+});
+
+async function loadData(){
+  const statusEl = document.getElementById('statusText');
+  try{
+    const res = await fetch('/api/prices', {cache:'no-store'});
+    const data = await res.json();
+    if(data.error && !data.gold){
+      throw new Error(data.error);
+    }
+    render(data);
+    const time = new Date(data.updated_at * 1000).toLocaleTimeString();
+    if(data.error){
+      statusEl.textContent = `⚠ ${data.error}`;
+      statusEl.className = 'err';
+    } else {
+      statusEl.textContent = `Live · last updated ${time}`;
+      statusEl.className = 'live';
+    }
+  }catch(err){
+    statusEl.textContent = `⚠ Could not reach price feed: ${err.message}`;
+    statusEl.className = 'err';
+  }
+}
+
+function render(data){
+  document.getElementById('goldEgp').textContent = fmt(data.gold.egp_per_gram);
+  document.getElementById('goldUsd').textContent = `${fmt(data.gold.usd_per_ounce)} USD / troy oz · ${fmt(data.gold.usd_per_gram)} USD / g`;
+
+  const karatGrid = document.getElementById('karatGrid');
+  karatGrid.innerHTML = '';
+  for(const [karat, value] of Object.entries(data.gold.by_karat)){
+    karatGrid.innerHTML += `
+      <div class="karat-cell">
+        <div class="k">${karat}</div>
+        <div class="v">${fmt(value)} EGP</div>
+      </div>`;
+  }
+
+  const fxList = document.getElementById('fxList');
+  fxList.innerHTML = '';
+  data.currencies.forEach(c => {
+    fxList.innerHTML += `
+      <div class="fx-row">
+        <div class="fx-left">
+          <span class="fx-code">${c.code}</span>
+          <span class="fx-name">${CCY_NAMES[c.code] || ''}</span>
+        </div>
+        <div class="fx-value">${fmt(c.egp, 3)} EGP</div>
+      </div>`;
+  });
+
+  const ticker = document.getElementById('ticker');
+  let line = `<span>GOLD 24K <b>${fmt(data.gold.egp_per_gram)} EGP/g</b></span>`;
+  data.currencies.forEach(c => {
+    line += `<span>${c.code}/EGP <b>${fmt(c.egp, 3)}</b></span>`;
+  });
+  ticker.innerHTML = line + line; // duplicated for seamless loop
+}
+
+function tickClock(){
+  document.getElementById('clock').textContent = new Date().toLocaleTimeString();
+}
+
+loadData();
+tickClock();
+setInterval(loadData, 30000);   // refresh prices every 30s
+setInterval(tickClock, 1000);
+</script>
+</body>
+</html>

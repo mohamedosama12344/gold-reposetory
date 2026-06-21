@@ -1,0 +1,15 @@
+[Unit]
+Description=Cairo Bullion Board - Live Gold & FX Flask app
+After=network.target
+
+[Service]
+Type=simple
+User=deploy
+WorkingDirectory=/opt/gold-dashboard
+Environment="PATH=/opt/gold-dashboard/venv/bin"
+ExecStart=/opt/gold-dashboard/venv/bin/gunicorn -w 2 -b 0.0.0.0:5000 app:app
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
